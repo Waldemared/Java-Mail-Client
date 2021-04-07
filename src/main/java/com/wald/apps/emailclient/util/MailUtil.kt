@@ -34,16 +34,6 @@ fun parseMultipart(part: MimePart, content: Multipart): ParsedMessage {
         part.isMimeType(MULTIPART_MIXED) -> parseMixed(content)
         else -> parseMixed(content)
     }
-
-    val messageContent = StringBuffer()
-    val multipart = content
-    for (i in 0 until multipart.count) {
-        val part = multipart.getBodyPart(i)
-        if (part.isMimeType("text/plain")) {
-            messageContent.append(part.content.toString())
-        }
-    }
-    messageContent.toString()
 }
 
 fun parseAttachment(part: MimePart): ParsedMessage {

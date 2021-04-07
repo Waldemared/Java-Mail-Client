@@ -26,7 +26,7 @@ fun main(args: Array<String>) {
     }
 
     val services = runCatching {
-        mapper.readValue(servicesSource.toFile(), object : TypeReference<List<MailConnectionConfig>>() {})
+        mapper.readValue(servicesSource.toFile(), object : TypeReference<List<MailService>>() {})
     }.onFailure { errorAndTerminate("Failed to scan description of available services.") }.getOrThrow()
 
     client.connect(services)

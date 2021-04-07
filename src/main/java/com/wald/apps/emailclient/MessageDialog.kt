@@ -1,6 +1,7 @@
 package com.wald.apps.emailclient
 
 import jakarta.activation.DataSource
+import jakarta.mail.Message
 import java.awt.*
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
@@ -14,7 +15,8 @@ class MessageDialog(parent: Frame, direction: MessageDirection, priorMessage: Me
     private val subjectTextField: JTextField
     private val contentTextArea: JTextArea
 
-    private var attachedFiles: List<File> = emptyList()
+    var attachedFiles: List<File> = emptyList()
+    var resentMessage: Message? = null
 
     private var cancelled = false
 
@@ -68,13 +70,7 @@ class MessageDialog(parent: Frame, direction: MessageDirection, priorMessage: Me
     val content: String
         get() = contentTextArea.text
 
-    val attachments: List<File>
-        get() = attachedFiles
-
-    val resentAttachments: List<DataSource>
-
-    companion object {
-    }
+    companion object;
 
     // Constructor for dialog.
     init {
@@ -109,7 +105,7 @@ class MessageDialog(parent: Frame, direction: MessageDirection, priorMessage: Me
                         " -----------------\n" +
                         priorMessage.content.prioritisedPlainText())
 
-                resentAttachments = emptyList()
+                resentMessage = priorMessage.message
             }
             MessageDirection.FORWARD -> {
                 title = "Forward Message"
@@ -126,13 +122,12 @@ class MessageDialog(parent: Frame, direction: MessageDirection, priorMessage: Me
                 content = ("\n----------------- " +
                         "FORWARDED MESSAGE" +
                         " -----------------\n" +
-                        priorMessage
-                            .content.also { resentAttachments = it.attachments ?: emptyList() }
-                            .prioritisedPlainText())
+                        priorMessage.content.prioritisedPlainText())
+
+                resentMessage = priorMessage.message
             }
             MessageDirection.NEW -> {
                 title = "New Message"
-                resentAttachments = emptyList()
             }
         }
 
@@ -155,7 +150,6 @@ class MessageDialog(parent: Frame, direction: MessageDirection, priorMessage: Me
         layout.setConstraints(fromLabel, constraints)
         fieldsPanel.add(fromLabel)
         fromTextField = JTextField()
-        fromTextField.text = "therealcf2014@mail.ru"
         constraints = GridBagConstraints()
         constraints.fill = GridBagConstraints.HORIZONTAL
         constraints.gridwidth = GridBagConstraints.REMAINDER
@@ -169,7 +163,6 @@ class MessageDialog(parent: Frame, direction: MessageDirection, priorMessage: Me
         layout.setConstraints(toLabel, constraints)
         fieldsPanel.add(toLabel)
         toTextField = JTextField(to)
-        toTextField.text = "therealcf2014@gmail.com"
         constraints = GridBagConstraints()
         constraints.fill = GridBagConstraints.HORIZONTAL
         constraints.gridwidth = GridBagConstraints.REMAINDER

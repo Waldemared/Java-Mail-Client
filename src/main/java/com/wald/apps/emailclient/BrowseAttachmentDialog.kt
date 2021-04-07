@@ -1,6 +1,5 @@
 package com.wald.apps.emailclient
 
-import com.wald.apps.emailclient.mime.GridBagWrapper
 import jakarta.activation.DataSource
 import java.awt.BorderLayout
 import java.awt.Color
@@ -12,7 +11,6 @@ import javax.swing.*
 
 /**
  * @author vkosolapov
- * @since
  */
 class BrowseAttachmentDialog(parent: JFrame?, attachments: List<DataSource>) : JDialog(parent) {
 

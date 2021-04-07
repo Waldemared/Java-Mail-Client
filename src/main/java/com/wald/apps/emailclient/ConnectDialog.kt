@@ -1,6 +1,6 @@
 package com.wald.apps.emailclient
 
-import com.wald.apps.emailclient.configuration.MailConnectionConfig
+import com.wald.apps.emailclient.configuration.MailService
 import java.awt.*
 import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
@@ -10,11 +10,11 @@ import kotlin.system.exitProcess
 
 /* This class displays a dialog for entering e-mail
   server connection settings. */
-class ConnectDialog(parent: Frame, configs: List<MailConnectionConfig>) : JDialog(parent, true) {
+class ConnectDialog(parent: Frame, serviceProviders: List<MailService>) : JDialog(parent, true) {
     // -- UI Items --
     // Combo box for e-mail server types.
 
-    private val configComboBox: JComboBox<MailConnectionConfig>
+    private val serviceComboBox: JComboBox<MailService>
 
     // Server, username and SMTP server text fields.
     private val usernameTextField: JTextField
@@ -22,8 +22,8 @@ class ConnectDialog(parent: Frame, configs: List<MailConnectionConfig>) : JDialo
     // Password text field.
     private val passwordField: JPasswordField
     
-    val config: MailConnectionConfig
-        get() = configComboBox.selectedItem as MailConnectionConfig
+    val service: MailService
+        get() = serviceComboBox.selectedItem as MailService
 
     // Get e-mail username.
     val username: String
@@ -75,14 +75,14 @@ class ConnectDialog(parent: Frame, configs: List<MailConnectionConfig>) : JDialo
             insets = Insets(5, 5, 0, 0)
         }
         settingsPanel.add(configLabel)
-        configComboBox = JComboBox<MailConnectionConfig>(configs.toTypedArray())
-        layout.constraintsOn(configComboBox) {
+        serviceComboBox = JComboBox<MailService>(serviceProviders.toTypedArray())
+        layout.constraintsOn(serviceComboBox) {
             anchor = GridBagConstraints.WEST
             gridwidth = GridBagConstraints.REMAINDER
             insets = Insets(5, 5, 0, 5)
             weightx = 1.0
         }
-        settingsPanel.add(configComboBox)
+        settingsPanel.add(serviceComboBox)
 
         val usernameLabel = JLabel("Username:")
         layout.constraintsOn(usernameLabel) {
@@ -91,7 +91,6 @@ class ConnectDialog(parent: Frame, configs: List<MailConnectionConfig>) : JDialo
         }
         settingsPanel.add(usernameLabel)
         usernameTextField = JTextField()
-        usernameTextField.text = "therealcf2014@mail.ru"
         layout.constraintsOn(usernameTextField) {
             anchor = GridBagConstraints.WEST
             fill = GridBagConstraints.HORIZONTAL

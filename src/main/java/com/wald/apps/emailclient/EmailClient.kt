@@ -1,7 +1,7 @@
 package com.wald.apps.emailclient
 
 import com.wald.apps.emailclient.configuration.AuthConfig
-import com.wald.apps.emailclient.configuration.MailConnectionConfig
+import com.wald.apps.emailclient.configuration.MailService
 import com.wald.apps.emailclient.util.TEXT_HTML
 import com.wald.apps.emailclient.util.parse
 import jakarta.activation.DataHandler
@@ -28,10 +28,8 @@ import kotlin.system.exitProcess
 //import java.net.*;
 // The E-mail Client.
 internal class EmailClient : JFrame() {
-    // Message table's data model.
     private val tableModel: MessagesTableModel
 
-    // Table listing messages.
     private val table: JTable
 
     // This the text area for displaying messages.
@@ -167,7 +165,7 @@ internal class EmailClient : JFrame() {
     }
 
     // Connect to e-mail server.
-    fun connect(services: List<MailConnectionConfig>) {
+    fun connect(services: List<MailService>) {
         val connectDialog = ConnectDialog(this, services)
         var mailConfig = requestAuthData(connectDialog)
         var store = connectToStore(mailConfig)
@@ -230,23 +228,23 @@ internal class EmailClient : JFrame() {
         connectDialog.isVisible = true
 
         return AuthConfig(
-            connectionConfig = connectDialog.config,
+            mailService = connectDialog.service,
             username = connectDialog.username,
             password = connectDialog.password
         )
     }
 
     private fun connectToStore(authConfig: AuthConfig): Store? {
-        senderProperties = authConfig.connectionConfig.javaMailSenderProperties(
+        senderProperties = authConfig.mailService.javaMailSenderProperties(
             user = authConfig.username,
             password = authConfig.password
         )
 
-        val storageProperties = authConfig.connectionConfig.javaMailStorageProperties()
+        val storageProperties = authConfig.mailService.javaMailStorageProperties()
         val emailSession = Session.getDefaultInstance(storageProperties)
 
         try {
-            val store = emailSession.getStore(authConfig.connectionConfig.javaMailStoreProtocol())
+            val store = emailSession.getStore(authConfig.mailService.javaMailStoreProtocol())
             store.connect(authConfig.username, authConfig.password)
             return store
         } catch (e: Exception) {
@@ -307,10 +305,10 @@ internal class EmailClient : JFrame() {
             val newMessage = constructMessage(dialog, session)
 
             // Send message
-            val transport = session.getTransport(mailConfig.connectionConfig.javaMailSenderProtocol())
+            val transport = session.getTransport(mailConfig.mailService.javaMailSenderProtocol())
             transport.connect(
-                mailConfig.connectionConfig.senderProperties.host,
-                mailConfig.connectionConfig.senderProperties.port,
+                mailConfig.mailService.senderProperties.host,
+                mailConfig.mailService.senderProperties.port,
                 mailConfig.username,
                 mailConfig.password
             )
@@ -421,9 +419,9 @@ internal class EmailClient : JFrame() {
         newMessage.subject = dialog.subject
         newMessage.sentDate = Date()
 
-        val attachments = dialog.attachments
-        val attachmentsToResend = dialog.resentAttachments
-        if (attachments.isEmpty() && attachmentsToResend.isEmpty()) {
+        val attachments = dialog.attachedFiles
+        val resendMessage = dialog.resentMessage
+        if (attachments.isEmpty() && resendMessage == null) {
             newMessage.setText(dialog.content, Charsets.UTF_8.displayName().toLowerCase())
         } else {
             val contentPart = MimeBodyPart()
@@ -439,16 +437,15 @@ internal class EmailClient : JFrame() {
                 attachedParts.add(part)
             }
 
-            attachmentsToResend.forEach {
-                val part = MimeBodyPart()
-                part.dataHandler = DataHandler(it)
-                part.fileName = it.name
-                attachedParts.add(part)
-            }
-
             val multipart = MimeMultipart()
             multipart.addBodyPart(contentPart)
-            attachedParts.forEach { multipart.addBodyPart(it) }
+            if (dialog.resentMessage != null) {
+                val resentMessagePart = with(MimeBodyPart()) {
+                    setContent(dialog.resentMessage, "message/rfc822")
+                    this
+                }
+                multipart.addBodyPart(resentMessagePart)
+            }
 
             newMessage.setContent(multipart)
         }

@@ -8,7 +8,7 @@ import java.util.*
 /**
  * @author vkosolapov
  */
-class MailConnectionConfig
+class MailService
     @JsonCreator
     constructor(@JsonProperty("name") var name: String,
                 @JsonProperty("storageProperties") var storageProperties: MailStorageProperties,
@@ -51,8 +51,8 @@ class MailConnectionConfig
 
     private fun properties(vararg properties: Pair<String, String>): Properties {
         val jProperties = Properties()
-        for (property in properties) {
-            jProperties[property.first] = property.second
+        for ((code, value) in properties) {
+            jProperties[code] = value
         }
         return jProperties
     }

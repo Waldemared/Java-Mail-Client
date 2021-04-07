@@ -1,6 +1,5 @@
 package com.wald.apps.emailclient
 
-import com.wald.apps.emailclient.mime.GridBagWrapper
 import java.awt.*
 import java.awt.datatransfer.DataFlavor
 import java.awt.datatransfer.Transferable
@@ -119,11 +118,11 @@ class ManageAttachmentDialog(parent: Dialog?, val initialFiles: List<File>) : JD
     override fun dragExit(dte: DropTargetEvent) = Unit
 
     override fun drop(evt: DropTargetDropEvent) {
-        val action: Int = evt.getDropAction()
+        val action: Int = evt.dropAction
         evt.acceptDrop(action)
         print("g")
         try {
-            val data: Transferable = evt.getTransferable()
+            val data: Transferable = evt.transferable
             if (data.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
                 val files = data.getTransferData(DataFlavor.javaFileListFlavor) as List<File>
                 for (file in files) {
